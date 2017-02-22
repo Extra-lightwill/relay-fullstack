@@ -1,4 +1,7 @@
 /* eslint-disable no-unused-vars, no-use-before-define */
+
+//https://github.com/mickhansen/graphql-sequelize/issues/227 
+
 import {
   GraphQLBoolean,
   GraphQLFloat,
@@ -23,139 +26,222 @@ import {
 } from 'graphql-relay';
 
 import {
-  User,
+  //User,
   Feature,
   getUser,
   getFeature,
   getFeatures,
   addFeature
-} from './database';
+} from './databaseRFSDRAFT';
 
+//import instance of sequelize for node definitions
+
+import Conn from './db/connection';
+
+//import graphql-sequelize logic
+
+import { resolver, 
+          relay, 
+          attributeFields,
+          typeMapper 
+} from 'graphql-sequelize';
+
+//declare node definitions 
+
+const { sequelizeConnection, sequelizeNodeInterface } = relay; 
+
+const {
+    nodeInterface,
+    nodeField,
+    nodeTypeMapper
+  } = sequelizeNodeInterface(Conn);
+
+//import models
+
+import {
+    User,
+    Task,
+    Project,
+    ProjectUser,
+} from './db/model';
+
+
+//-----Type Mapping------//
+
+nodeTypeMapper.mapTypes({
+  [User.name]: { type: userType },
+  [Task.name]: { type: taskType },
+  viewer: { type: queryType }
+});
 
 /**
- * We get the node interface and field from the Relay library.
- *
- * The first method defines the way we resolve an ID to its object.
- * The second defines the way we resolve an object to its GraphQL type.
+ * TYPES 
  */
-const { nodeInterface, nodeField } = nodeDefinitions(
-  (globalId) => {
-    const { type, id } = fromGlobalId(globalId);
-    if (type === 'User') {
-      return getUser(id);
-    } else if (type === 'Feature') {
-      return getFeature(id);
-    }
-    return null;
-  },
-  (obj) => {
-    if (obj instanceof User) {
-      return userType;
-    } else if (obj instanceof Feature) {
-      return featureType;
-    }
-    return null;
-  }
-);
 
-/**
- * Define your own types here
- */
+const viewer = User.build({
+        id: Math.ceil(Math.random() * 999)
+      });
 
 const userType = new GraphQLObjectType({
   name: 'User',
-  description: 'A person who uses our app',
   fields: () => ({
     id: globalIdField('User'),
-    features: {
-      type: featureConnection,
-      description: 'Features that I have',
-      args: connectionArgs,
-      resolve: (_, args) => connectionFromArray(getFeatures(), args)
-    },
     username: {
       type: GraphQLString,
       description: 'Users\'s username'
     },
-    website: {
+    test01: {
       type: GraphQLString,
       description: 'User\'s website'
-    }
-  }),
-  interfaces: [nodeInterface]
+    },
+    test02: {
+      type: GraphQLString,
+      description: 'User\'s website'
+    },  
+     website: {
+      type: GraphQLString,
+      description: 'User\'s website'
+    },
+      /*projects: {
+        type: new GraphQLList(projectType),
+        args: {
+          limit: {
+            type: GraphQLInt
+          },
+          order: {
+            type: GraphQLString
+          }
+        },
+        resolve: resolver(Project)
+      },*/
+      users: {
+        type: new GraphQLList(userType),
+        args: {
+          limit: {
+            type: GraphQLInt
+          },
+          order: {
+            type: GraphQLString
+          }
+        },
+        resolve: resolver(User)
+      },
+       tasks: {
+            type: taskConnection.connectionType,
+            args: taskConnection.connectionArgs,
+            resolve: taskConnection.resolve
+        },
+})
 });
 
-const featureType = new GraphQLObjectType({
-  name: 'Feature',
-  description: 'Feature integrated in our starter kit',
+
+const taskType = new GraphQLObjectType({
+  name: 'Task',
   fields: () => ({
-    id: globalIdField('Feature'),
-    name: {
-      type: GraphQLString,
-      description: 'Name of the feature'
+    id: globalIdField('Task'),
+    completed: {
+      type: GraphQLBoolean
     },
-    description: {
+    text: {
       type: GraphQLString,
-      description: 'Description of the feature'
+      resolve: (payload) => payload.text,
+      //resolve: resolver(Task)  
     },
-    url: {
-      type: GraphQLString,
-      description: 'Url of the feature'
-    }
+    user: {
+      type: userType,
+      resolve: resolver(Task.User)
+    },
+    /*subTasks: {
+      type: subtaskConnection.connectionType,
+      args: connectionArgs,
+      resolve: resolver(Task.SubTask)
+    }*/
   }),
   interfaces: [nodeInterface]
 });
 
-/**
- * Define your own connection types here
- */
-const { connectionType: featureConnection, edgeType: featureEdge } = connectionDefinitions({ name: 'Feature', nodeType: featureType });
 
 /**
- * Create feature example
+ * CONNECTIONS 
  */
 
-const addFeatureMutation = mutationWithClientMutationId({
-  name: 'AddFeature',
-  inputFields: {
-    name: { type: new GraphQLNonNull(GraphQLString) },
-    description: { type: new GraphQLNonNull(GraphQLString) },
-    url: { type: new GraphQLNonNull(GraphQLString) },
-  },
+/*const taskConnection = connectionDefinitions({name: 'Task', nodeType: taskType,}),  
+      subordinateConnection = connectionDefinitions({name: 'Subordinate', nodeType: userType}), 
+      subtaskConnection = connectionDefinitions({name: 'Subtask', nodeType: taskType}), 
+      userConnection = connectionDefinitions({name: 'User', nodeType: userType});*/
 
-  outputFields: {
-    featureEdge: {
-      type: featureEdge,
-      resolve: (obj) => {
-        const cursorId = cursorForObjectInConnection(getFeatures(), obj);
-        return { node: obj, cursor: cursorId };
-      }
-    },
-    viewer: {
-      type: userType,
-      resolve: () => getUser(1)
-    }
-  },
 
-  mutateAndGetPayload: ({ name, description, url }) => addFeature(name, description, url)
+const taskConnection = sequelizeConnection({
+        name: Task.name,
+        nodeType: taskType,
+        target: User.Tasks,
 });
+/**
+ * MUTATIONS 
+ */
+
+
+const addTaskMutation = mutationWithClientMutationId({
+          name: 'addTask',
+          inputFields: {
+            text: {
+              type: new GraphQLNonNull(GraphQLString)
+            }
+          },
+          outputFields: () => ({
+            viewer: {
+              type: userType,
+              resolve: (payload, {viewer}) => {
+                return viewer;
+              }
+            },
+            task: {
+              type: taskType,
+              resolve: (payload) => payload.Task
+            },
+            taskEdge: {
+              type: taskConnection.edgeType,
+              resolve: (payload) => taskConnection.resolveEdge(payload.Task)
+            }
+          }),
+          mutateAndGetPayload: async ({text}, {viewer}) => {
+            const task = await Task.create({
+              text: text
+              //user_id: viewer.id
+            });
+
+            return {task};
+          }
+        });
+
+
+
+  /*Task.create.resolves(Task.build({
+        //id: viewer.id,
+        text: text,
+        user_id: this.viewer.get('id')
+          }));*/
+
+ /* mutateAndGetPayload: ({text}) => {
+    const localTodoId = addTodo(text);
+    return {localTodoId}; */
 
 
 /**
  * This is the type that will be the root of our query,
  * and the entry point into our schema.
  */
+
 const queryType = new GraphQLObjectType({
-  name: 'Query',
-  fields: () => ({
-    node: nodeField,
-    // Add your own root fields here
+    name: 'Query',
+    fields: {
     viewer: {
       type: userType,
-      resolve: () => getUser(1)
+      resolve: () => viewer
+    },
+    node: nodeField,
     }
   })
-});
 
 /**
  * This is the type that will be the root of our mutations,
@@ -164,8 +250,7 @@ const queryType = new GraphQLObjectType({
 const mutationType = new GraphQLObjectType({
   name: 'Mutation',
   fields: () => ({
-    addFeature: addFeatureMutation
-    // Add your own mutations here
+    addTask: addTaskMutation,
   })
 });
 
@@ -177,3 +262,16 @@ export default new GraphQLSchema({
   query: queryType,
   mutation: mutationType
 });
+
+
+
+
+
+
+
+        
+
+
+
+
+

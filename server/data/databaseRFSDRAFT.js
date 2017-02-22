@@ -1,3 +1,4 @@
+
 class User {
   constructor(id, name, username, website) {
     this.id = id;
@@ -15,6 +16,13 @@ class Feature {
     this.url = url;
   }
 }
+
+/*class ToDo {
+  constructor(id, text) {
+    this.id = id;
+    this.text = text;
+  }
+}*/
 
 const lvarayut = new User(1, 'Varayut Lerdkanlayanawat', 'lvarayut', 'https://github.com/lvarayut/relay-fullstack');
 const features = [
