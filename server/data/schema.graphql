@@ -12,6 +12,7 @@ type addTaskPayload {
 
 type Mutation {
   addTask(input: addTaskInput!): addTaskPayload
+  removeTask(input: removeTaskInput!): removeTaskPayload
 }
 
 # An object with an ID
@@ -43,6 +44,17 @@ type Query {
     # The ID of an object
     id: ID!
   ): Node
+}
+
+input removeTaskInput {
+  id: ID!
+  clientMutationId: String
+}
+
+type removeTaskPayload {
+  viewer: User
+  deletedTaskId: ID
+  clientMutationId: String
 }
 
 type Task implements Node {

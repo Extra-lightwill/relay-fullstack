@@ -214,7 +214,29 @@ const addTaskMutation = mutationWithClientMutationId({
           }
         });
 
-
+const removeTaskMutation = mutationWithClientMutationId({
+          name: 'removeTask',
+          inputFields: {
+            id: { type: new GraphQLNonNull(GraphQLID) },
+           },
+          outputFields: () => ({
+            viewer: {
+              type: userType,
+              resolve: (payload, {viewer}) => {
+                return viewer;
+                }
+              },
+            deletedTaskId: {
+              type: GraphQLID,
+              resolve: ({id}) => id,
+            },
+          }),
+          mutateAndGetPayload: ({id}) => {
+          const localTaskId = fromGlobalId(id).id;
+          removeTask(localTaskId);
+          return {id};
+          },
+});
 
   /*Task.create.resolves(Task.build({
         //id: viewer.id,
@@ -251,6 +273,7 @@ const mutationType = new GraphQLObjectType({
   name: 'Mutation',
   fields: () => ({
     addTask: addTaskMutation,
+    removeTask: removeTaskMutation,
   })
 });
 

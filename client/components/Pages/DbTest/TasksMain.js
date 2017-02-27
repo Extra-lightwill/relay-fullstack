@@ -24,6 +24,7 @@ class TasksMain extends React.Component {
     this._onNewTaskSave = this._onNewTaskSave.bind(this);
     this._handleTextInputCancel = this._handleTextInputCancel.bind(this);
     this._commitChanges = this._commitChanges.bind(this);
+    this._onDeleteTask = this._onDeleteTask.bind(this);
   }
 
  
@@ -36,7 +37,11 @@ class TasksMain extends React.Component {
   };
 
 
-
+  _onDeleteTask = () => {
+    this.props.relay.commitUpdate(
+      new removeTaskMutation({viewer: this.props.viewer, tasks: this.props.tasks})
+    );
+  }
 
     /*_onTextInputSave = (text) => {
     const { relay, task } = this.props;
@@ -117,7 +122,7 @@ class TasksMain extends React.Component {
 			<div>
 
       <button onClick={this._onNewTaskSave}>Add new task!</button>
-      <button>Edit task</button>
+      <button onClick={this._onDeleteTask}>Edit task</button>
       <button>Delete task</button>
 
       <br />
