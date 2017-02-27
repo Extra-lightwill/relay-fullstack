@@ -2,6 +2,8 @@ import React from 'react';
 import Relay from 'react-relay';
 
 import addTaskMutation from './addTaskMutation';
+import removeTaskMutation from './removeTaskMutation';
+import editTaskMutation from './editTaskMutation';
 
 const ENTER_KEY_CODE = 13;
 const ESC_KEY_CODE = 27;
@@ -32,6 +34,7 @@ class TasksMain extends React.Component {
       this._commitChanges(),
     );
   };
+
 
 
 
@@ -115,6 +118,7 @@ class TasksMain extends React.Component {
 
       <button onClick={this._onNewTaskSave}>Add new task!</button>
       <button>Edit task</button>
+      <button>Delete task</button>
 
       <br />
       <br />

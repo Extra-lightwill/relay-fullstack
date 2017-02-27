@@ -1,6 +1,6 @@
 import Relay from 'react-relay';
 
-class addTaskMutation extends Relay.Mutation {
+export default class addTaskMutation extends Relay.Mutation {
 
   static fragments = {
     viewer: () => Relay.QL`
@@ -66,7 +66,6 @@ class addTaskMutation extends Relay.Mutation {
 
 }
 
-export default addTaskMutation;
 
 
 //RELAY EXAMPLE ADDTODO MUTATION
