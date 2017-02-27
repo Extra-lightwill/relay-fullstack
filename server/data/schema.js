@@ -238,6 +238,8 @@ const removeTaskMutation = mutationWithClientMutationId({
           },
 });
 
+//const editTaskMutation = mutationWithClientMutationId({})
+
   /*Task.create.resolves(Task.build({
         //id: viewer.id,
         text: text,
@@ -274,6 +276,7 @@ const mutationType = new GraphQLObjectType({
   fields: () => ({
     addTask: addTaskMutation,
     removeTask: removeTaskMutation,
+    //editTask: editTaskMutation,
   })
 });
 

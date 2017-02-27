@@ -1,6 +1,5 @@
-import Relay from 'react-relay';
+/*import Relay from 'react-relay';
 
-/*
 export default class editTaskMutation extends Relay.Mutation {
   static fragments = {
     todo: () => Relay.QL`
@@ -12,8 +11,9 @@ export default class editTaskMutation extends Relay.Mutation {
     // TODO: Mark completedCount optional
     viewer: () => Relay.QL`
       fragment on User {
-        id,
-        completedCount,
+       tasks (first: 10) {
+          edges
+        }
       }
     `,
   };
@@ -22,7 +22,7 @@ export default class editTaskMutation extends Relay.Mutation {
   }
   getFatQuery() {
     return Relay.QL`
-      fragment on ChangeTodoStatusPayload @relay(pattern: true) {
+      fragment on editTaskPayload @relay(pattern: true) {
         todo {
           complete,
         },
