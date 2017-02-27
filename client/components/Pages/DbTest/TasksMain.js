@@ -28,7 +28,8 @@ class TasksMain extends React.Component {
     _onNewTaskSave = (text) => {
 
     this.props.relay.commitUpdate(
-      new addTaskMutation({ viewer: this.props.viewer, text: this.state.text })
+      new addTaskMutation({ viewer: this.props.viewer, text: this.state.text }),
+      this._commitChanges(),
     );
   };
 
@@ -68,7 +69,7 @@ class TasksMain extends React.Component {
     if (this._handleTextInputCancel && e.keyCode === ESC_KEY_CODE) {
       this._handleTextInputCancel();
     } else if (e.keyCode === ENTER_KEY_CODE) {
-      this._commitChanges();
+      this._onNewTaskSave();
     }
   };
  
