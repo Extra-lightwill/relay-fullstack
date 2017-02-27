@@ -16,12 +16,11 @@ class TasksMain extends React.Component {
       viewer: this.props.viewer,
       tasks: this.props.viewer.tasks,
       isEditing: false,
-      text: this.props.initialValue || '',
+      text: '',
     };
 
     this._onNewTaskSave = this._onNewTaskSave.bind(this);
     this._handleTextInputCancel = this._handleTextInputCancel.bind(this);
-
     this._commitChanges = this._commitChanges.bind(this);
   }
 
@@ -29,9 +28,11 @@ class TasksMain extends React.Component {
     _onNewTaskSave = (text) => {
 
     this.props.relay.commitUpdate(
-      new addTaskMutation({ viewer: this.props.viewer, text })
+      new addTaskMutation({ viewer: this.props.viewer, text: this.state.text })
     );
   };
+
+
 
     /*_onTextInputSave = (text) => {
     const { relay, task } = this.props;
@@ -104,6 +105,8 @@ class TasksMain extends React.Component {
   };
 
     render () {	
+
+    console.log(this.state.text)
 
     const { viewer, children, relay, text } = this.props;
 
