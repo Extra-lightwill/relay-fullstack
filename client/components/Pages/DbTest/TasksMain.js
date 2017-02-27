@@ -51,19 +51,16 @@ class TasksMain extends React.Component {
   }
 
   
-    renderTasks() {
-    const { viewer, tasks } = this.props;
+    _renderTasks() {
 
-    return viewer.tasks.edges.map(({ node }) => (
+    return this.props.viewer.tasks.edges.map(edge => (
       <div 
-        key={node.id}
-        viewer={viewer}
-        task={node}
-      />
+        key={edge.node.id}
+        viewer={this.props.viewer}
+        task={edge.node}>
+        </div>
     ));
   }
-  
-
  
   onKeyDown = (e) => {
     if (this._handleTextInputCancel && e.keyCode === ESC_KEY_CODE) {
@@ -108,6 +105,8 @@ class TasksMain extends React.Component {
     render () {	
 
     console.log(this.state.text)
+    console.log(this.props.viewer)
+    console.log(this.props.viewer.tasks)
 
     const { viewer, children, relay, text } = this.props;
 
@@ -139,7 +138,7 @@ class TasksMain extends React.Component {
       <br />
       <br />
 
-       {this.renderTasks()}
+       {this._renderTasks()}
 
       </div>
 
