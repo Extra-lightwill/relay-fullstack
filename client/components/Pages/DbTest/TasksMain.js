@@ -122,8 +122,8 @@ class TasksMain extends React.Component {
 			<div>
 
       <button onClick={this._onNewTaskSave}>Add new task!</button>
-      <button onClick={this._onDeleteTask}>Edit task</button>
-      <button>Delete task</button>
+      <button>Edit task</button>
+      <button onClick={this._onDeleteTask}>Delete task</button>
 
       <br />
       <br />
